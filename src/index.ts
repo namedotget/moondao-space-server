@@ -82,21 +82,24 @@ const gameServer = new Server({
 gameServer.define("lobby", Lobby);
 
 const PORT = Number(process.env.PORT ?? 2567);
-gameServer
-  .listen(PORT)
-  .then(() => console.log(`Colyseus listening on :${PORT}`));
 
 // Add a simple health check endpoint
-gameServer.onShutdown(function(){
+gameServer.onShutdown(function () {
   console.log(`game server is going down.`);
 });
 
-// Simple HTTP handler for health checks
-const server = gameServer.transport.server;
-server.on('request', (req: any, res: any) => {
-  if (req.url === '/' && req.method === 'GET') {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Colyseus server is running');
+gameServer.listen(PORT).then(() => {
+  console.log(`Colyseus listening on :${PORT}`);
+
+  // Add health check handler after server is listening
+  const server = (transport as any).server;
+  if (server && typeof server.on === "function") {
+    server.on("request", (req: any, res: any) => {
+      if (req.url === "/" && req.method === "GET") {
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end("Colyseus server is running");
+      }
+    });
   }
 });
 
@@ -110,6 +113,7 @@ server.on('request', (req: any, res: any) => {
     req.headers["sec-websocket-protocol"]
   );
 });
+
 console.log(
   "seatReservationTimeToLive:",
   (matchMaker as any).seatReservationTimeToLive
