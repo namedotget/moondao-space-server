@@ -1,0 +1,61 @@
+app = "moondao-space-server"
+primary_region = "sjc"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  PORT = "2567"
+
+[http_service]
+  internal_port = 2567
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 800
+
+  [[http_service.http_options.headers]]
+    name = "Access-Control-Allow-Origin"
+    value = "*"
+
+  [[http_service.http_options.headers]]
+    name = "Access-Control-Allow-Methods"
+    value = "GET, POST, PUT, DELETE, OPTIONS"
+
+  [[http_service.http_options.headers]]
+    name = "Access-Control-Allow-Headers"
+    value = "Content-Type, Authorization"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 2567
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["http", "tls"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 800
+
+[deploy]
+  release_command = "echo 'Deployment complete'"
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[mounts]
