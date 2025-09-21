@@ -74,16 +74,19 @@ console.log("🚀 Starting Colyseus server...");
 console.log("📊 Environment variables:");
 console.log("  - NODE_ENV:", process.env.NODE_ENV);
 console.log("  - PORT:", process.env.PORT);
-console.log("  - JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Missing");
+console.log(
+  "  - JWT_SECRET:",
+  process.env.JWT_SECRET ? "✅ Set" : "❌ Missing"
+);
 
 // Global error handlers
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+  console.error("❌ Uncaught Exception:", error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
   process.exit(1);
 });
 
@@ -111,11 +114,26 @@ try {
 const PORT = Number(process.env.PORT ?? 2567);
 console.log("🔌 Attempting to listen on port:", PORT);
 
-gameServer.listen(PORT)
+gameServer
+  .listen(PORT)
   .then(() => {
     console.log(`🎉 Colyseus listening on :${PORT}`);
     console.log("🌐 Server is ready to accept connections");
     console.log("📡 WebSocket endpoint: wss://moondao-space-server.fly.dev/");
+
+    // Add connection logging to the underlying server
+    const server = (transport as any).server;
+    if (server) {
+      server.on("connection", (socket: any) => {
+        console.log("🔌 Raw WebSocket connection established");
+      });
+
+      server.on("request", (req: any, res: any) => {
+        console.log(`📨 HTTP Request: ${req.method} ${req.url}`);
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end("Colyseus server is running");
+      });
+    }
   })
   .catch((error) => {
     console.error("💥 Failed to start server:", error);
@@ -146,13 +164,13 @@ if (process.env.COLYSEUS_SEAT_RESERVATION_TIME) {
 }
 
 // Handle process termination gracefully
-process.on('SIGTERM', () => {
-  console.log('📴 Received SIGTERM, shutting down gracefully');
+process.on("SIGTERM", () => {
+  console.log("📴 Received SIGTERM, shutting down gracefully");
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
-  console.log('📴 Received SIGINT, shutting down gracefully');
+process.on("SIGINT", () => {
+  console.log("📴 Received SIGINT, shutting down gracefully");
   process.exit(0);
 });
 
