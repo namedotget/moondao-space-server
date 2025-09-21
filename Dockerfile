@@ -1,5 +1,5 @@
 # Use the official Node.js runtime as the base image
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set the working directory in the container
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN yarn build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Set the working directory
 WORKDIR /app
