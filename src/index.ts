@@ -86,6 +86,20 @@ gameServer
   .listen(PORT)
   .then(() => console.log(`Colyseus listening on :${PORT}`));
 
+// Add a simple health check endpoint
+gameServer.onShutdown(function(){
+  console.log(`game server is going down.`);
+});
+
+// Simple HTTP handler for health checks
+const server = gameServer.transport.server;
+server.on('request', (req: any, res: any) => {
+  if (req.url === '/' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Colyseus server is running');
+  }
+});
+
 // Debug upgrades to ensure ROOT path & subprotocol
 // (cast because ws types may differ depending on transport options)
 (transport.server as any)?.on("upgrade", (req: any) => {

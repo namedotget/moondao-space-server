@@ -7,31 +7,6 @@ primary_region = "sjc"
   NODE_ENV = "production"
   PORT = "2567"
 
-[http_service]
-  internal_port = 2567
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 1
-  processes = ["app"]
-
-  [http_service.concurrency]
-    type = "connections"
-    hard_limit = 1000
-    soft_limit = 800
-
-  [[http_service.http_options.headers]]
-    name = "Access-Control-Allow-Origin"
-    value = "*"
-
-  [[http_service.http_options.headers]]
-    name = "Access-Control-Allow-Methods"
-    value = "GET, POST, PUT, DELETE, OPTIONS"
-
-  [[http_service.http_options.headers]]
-    name = "Access-Control-Allow-Headers"
-    value = "Content-Type, Authorization"
-
 [[services]]
   protocol = "tcp"
   internal_port = 2567
@@ -49,6 +24,15 @@ primary_region = "sjc"
     type = "connections"
     hard_limit = 1000
     soft_limit = 800
+
+  [[services.http_checks]]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/"
+    protocol = "http"
+    restart_limit = 0
 
 [deploy]
   release_command = "echo 'Deployment complete'"
