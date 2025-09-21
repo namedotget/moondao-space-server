@@ -69,29 +69,65 @@ class DebugWsTransport extends WebSocketTransport {
   }
 }
 
+// Add startup logging
+console.log("🚀 Starting Colyseus server...");
+console.log("📊 Environment variables:");
+console.log("  - NODE_ENV:", process.env.NODE_ENV);
+console.log("  - PORT:", process.env.PORT);
+console.log("  - JWT_SECRET:", process.env.JWT_SECRET ? "✅ Set" : "❌ Missing");
+
+// Global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 const transport = new DebugWsTransport();
+console.log("✅ Transport created");
 
 const gameServer = new Server({
   transport,
   presence: new LocalPresence(), // ensure in-process presence
 });
+console.log("✅ Game server created");
 
 // Seat TTL (seconds) on the global matchmaker (not used by 0.14 for seats, kept for reference)
 (matchMaker as any).seatReservationTimeToLive = 120;
 
-gameServer.define("lobby", Lobby);
+console.log("🏠 Defining lobby room...");
+try {
+  gameServer.define("lobby", Lobby);
+  console.log("✅ Lobby room defined successfully");
+} catch (error) {
+  console.error("❌ Failed to define lobby room:", error);
+  process.exit(1);
+}
 
 const PORT = Number(process.env.PORT ?? 2567);
+console.log("🔌 Attempting to listen on port:", PORT);
 
-gameServer.listen(PORT).then(() => {
-  console.log(`Colyseus listening on :${PORT}`);
-});
+gameServer.listen(PORT)
+  .then(() => {
+    console.log(`🎉 Colyseus listening on :${PORT}`);
+    console.log("🌐 Server is ready to accept connections");
+    console.log("📡 WebSocket endpoint: wss://moondao-space-server.fly.dev/");
+  })
+  .catch((error) => {
+    console.error("💥 Failed to start server:", error);
+    console.error("Stack:", error.stack);
+    process.exit(1);
+  });
 
 // Debug upgrades to ensure ROOT path & subprotocol
 // (cast because ws types may differ depending on transport options)
 (transport.server as any)?.on("upgrade", (req: any) => {
   console.log(
-    "WS upgrade:",
+    "🔄 WS upgrade:",
     req.url,
     "protocol:",
     req.headers["sec-websocket-protocol"]
@@ -99,12 +135,25 @@ gameServer.listen(PORT).then(() => {
 });
 
 console.log(
-  "seatReservationTimeToLive:",
+  "⏰ seatReservationTimeToLive:",
   (matchMaker as any).seatReservationTimeToLive
 );
 if (process.env.COLYSEUS_SEAT_RESERVATION_TIME) {
   console.log(
-    "COLYSEUS_SEAT_RESERVATION_TIME:",
+    "⏰ COLYSEUS_SEAT_RESERVATION_TIME:",
     process.env.COLYSEUS_SEAT_RESERVATION_TIME
   );
 }
+
+// Handle process termination gracefully
+process.on('SIGTERM', () => {
+  console.log('📴 Received SIGTERM, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('📴 Received SIGINT, shutting down gracefully');
+  process.exit(0);
+});
+
+console.log("✅ Server initialization complete");
