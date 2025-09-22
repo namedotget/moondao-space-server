@@ -7,14 +7,20 @@ primary_region = "sjc"
   NODE_ENV = "production"
   PORT = "2567"
 
-[http_service]
+[[services]]
+  protocol = "tcp"
   internal_port = 2567
-  force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 1
 
-  [http_service.concurrency]
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["http", "tls"]
+
+  [services.concurrency]
     type = "connections"
     hard_limit = 1000
     soft_limit = 800
