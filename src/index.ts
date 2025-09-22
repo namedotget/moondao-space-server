@@ -116,13 +116,13 @@ gameServer.onShutdown(() => {
   console.log("🔌 Server shutting down...");
 });
 
-const PORT = Number(process.env.PORT ?? 8080);
+const PORT = Number(process.env.PORT ?? 2567);
 console.log("🔌 Attempting to listen on port:", PORT);
 
 gameServer
-  .listen(PORT)
+  .listen(PORT, "0.0.0.0")
   .then(() => {
-    console.log(`🎉 Colyseus listening on :${PORT}`);
+    console.log(`🎉 Colyseus listening on 0.0.0.0:${PORT}`);
     console.log("🌐 Server is ready to accept connections");
     console.log("📡 WebSocket endpoint: wss://moondao-space-server.fly.dev/");
 
