@@ -111,6 +111,11 @@ try {
   process.exit(1);
 }
 
+// Add express-like middleware for basic HTTP responses
+gameServer.onShutdown(() => {
+  console.log("🔌 Server shutting down...");
+});
+
 const PORT = Number(process.env.PORT ?? 2567);
 console.log("🔌 Attempting to listen on port:", PORT);
 
@@ -121,12 +126,33 @@ gameServer
     console.log("🌐 Server is ready to accept connections");
     console.log("📡 WebSocket endpoint: wss://moondao-space-server.fly.dev/");
 
-    // REMOVED: Conflicting HTTP request handler
-    // Only add connection logging for WebSockets
+    // Log all incoming connections
     const server = (transport as any).server;
     if (server) {
       server.on("connection", (socket: any) => {
-        console.log("🔌 Raw WebSocket connection established");
+        console.log(
+          "🔌 Raw WebSocket connection established from:",
+          socket.remoteAddress
+        );
+      });
+
+      // Add basic HTTP handler for health checks
+      server.on("request", (req: any, res: any) => {
+        console.log(
+          `📨 HTTP ${req.method} ${req.url} from ${req.socket.remoteAddress}`
+        );
+
+        // Only handle simple GET requests to avoid conflicts
+        if (req.method === "GET" && req.url === "/") {
+          res.writeHead(200, {
+            "Content-Type": "text/plain",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          });
+          res.end("Colyseus server is running");
+        }
+        // Let Colyseus handle all other requests
       });
     }
   })
@@ -137,13 +163,14 @@ gameServer
   });
 
 // Debug upgrades to ensure ROOT path & subprotocol
-// (cast because ws types may differ depending on transport options)
 (transport.server as any)?.on("upgrade", (req: any) => {
   console.log(
     "🔄 WS upgrade:",
     req.url,
     "protocol:",
-    req.headers["sec-websocket-protocol"]
+    req.headers["sec-websocket-protocol"],
+    "from:",
+    req.socket.remoteAddress
   );
 });
 
