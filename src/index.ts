@@ -116,7 +116,7 @@ gameServer.onShutdown(() => {
   console.log("🔌 Server shutting down...");
 });
 
-const PORT = Number(process.env.PORT ?? 2567);
+const PORT = Number(process.env.PORT ?? 8080);
 console.log("🔌 Attempting to listen on port:", PORT);
 
 gameServer
