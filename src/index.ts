@@ -3,6 +3,7 @@ import { WebSocketTransport, WebSocketClient } from "@colyseus/ws-transport";
 import url from "url";
 import querystring from "querystring";
 import { Lobby } from "./rooms/Lobby";
+import { RedisPresence } from "@colyseus/redis-presence";
 
 class DebugWsTransport extends WebSocketTransport {
   async onConnection(rawClient: any, req: any) {
@@ -93,9 +94,13 @@ process.on("unhandledRejection", (reason, promise) => {
 const transport = new DebugWsTransport();
 console.log("✅ Transport created");
 
+// Replace LocalPresence with RedisPresence
 const gameServer = new Server({
-  transport,
-  presence: new LocalPresence(), // ensure in-process presence
+  transport: transport,
+  presence: new RedisPresence({
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || "6379"),
+  }),
 });
 console.log("✅ Game server created");
 
