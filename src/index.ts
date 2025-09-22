@@ -121,17 +121,12 @@ gameServer
     console.log("🌐 Server is ready to accept connections");
     console.log("📡 WebSocket endpoint: wss://moondao-space-server.fly.dev/");
 
-    // Add connection logging to the underlying server
+    // REMOVED: Conflicting HTTP request handler
+    // Only add connection logging for WebSockets
     const server = (transport as any).server;
     if (server) {
       server.on("connection", (socket: any) => {
         console.log("🔌 Raw WebSocket connection established");
-      });
-
-      server.on("request", (req: any, res: any) => {
-        console.log(`📨 HTTP Request: ${req.method} ${req.url}`);
-        res.writeHead(200, { "Content-Type": "text/plain" });
-        res.end("Colyseus server is running");
       });
     }
   })
