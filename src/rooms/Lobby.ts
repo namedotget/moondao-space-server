@@ -287,7 +287,7 @@ export class Lobby extends Room<RoomState> {
 
         // Send error message to the client before rejecting
         try {
-          (client as any).send("duplicate_session_error", {
+          (client as any).send("duplicate_session", {
             message: "Only one session per account is allowed",
           });
         } catch (e) {
