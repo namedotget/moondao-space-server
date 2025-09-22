@@ -136,13 +136,14 @@ gameServer
         );
       });
 
-      // Add basic HTTP handler for health checks
+      // Log ALL HTTP requests
       server.on("request", (req: any, res: any) => {
         console.log(
-          `📨 HTTP ${req.method} ${req.url} from ${req.socket.remoteAddress}`
+          `📨 ALL HTTP ${req.method} ${req.url} from ${req.socket.remoteAddress}`
         );
+        console.log(`📨 Headers:`, req.headers);
 
-        // Only handle simple GET requests to avoid conflicts
+        // Only handle simple GET requests to avoid conflicts with Colyseus
         if (req.method === "GET" && req.url === "/") {
           res.writeHead(200, {
             "Content-Type": "text/plain",
@@ -152,7 +153,7 @@ gameServer
           });
           res.end("Colyseus server is running");
         }
-        // Let Colyseus handle all other requests
+        // Let Colyseus handle all other requests (including POST /matchmake/...)
       });
     }
   })
