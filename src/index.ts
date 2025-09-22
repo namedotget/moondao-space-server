@@ -100,7 +100,7 @@ const gameServer = new Server({
 console.log("✅ Game server created");
 
 // Seat TTL (seconds) on the global matchmaker (not used by 0.14 for seats, kept for reference)
-(matchMaker as any).seatReservationTimeToLive = 120;
+(matchMaker as any).seatReservationTimeToLive = 300; // Increased from 120 to 300 seconds
 
 console.log("🏠 Defining lobby room...");
 try {
