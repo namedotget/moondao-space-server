@@ -13,7 +13,7 @@ export class Lobby extends Room<RoomState> {
     this.setState(new RoomState());
     // Extend seat reservation TTL to avoid early expiration during WebSocket upgrade in dev
     try {
-      (this as any).setSeatReservationTime?.(300);
+      (this as any).setSeatReservationTime?.(600); // Increased from 300 to 600 seconds
       console.log(
         "Lobby onCreate: seatReservationTime=",
         (this as any).seatReservationTime
